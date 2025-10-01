@@ -147,6 +147,7 @@ export default function Dashboard() {
                               {filteredIssues.map((issue) => (
                                 <MotionDiv
                                   key={issue["Issue key"]}
+                                  // @ts-ignore
                                   className={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
