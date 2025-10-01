@@ -1,9 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Papa from "papaparse";
 import { Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+
+// Strongly typed motion.div wrapper
+const MotionDiv = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
+  (props, ref) => <motion.div ref={ref} {...props} />
+);
 
 const STATUS_ORDER = ["Delay", "To Do", "In Progress", "Done"];
 const STATUS_COLOR: Record<string, string> = {
@@ -88,6 +93,7 @@ export default function Dashboard() {
           const isCollapsed = collapsed[owner];
           return (
             <Card key={owner} className="rounded-2xl shadow-md">
+              {/* Swimlane Header */}
               <div className="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
                 <h2 className="font-semibold">{owner}</h2>
                 <div className="flex gap-2 items-center">
@@ -108,6 +114,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
+              {/* Swimlane Content */}
               <AnimatePresence initial={false}>
                 {!isCollapsed && (
                   <motion.div
@@ -136,11 +143,13 @@ export default function Dashboard() {
                                 </div>
                               )}
                               {filteredIssues.map((issue) => (
-                                <motion.div
+                                <MotionDiv
                                   key={issue["Issue key"]}
-                                  className={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
+                                  classes={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  transition={{ duration: 0.2 }}
                                 >
                                   <div className="font-semibold text-sm">
                                     {issue["Issue key"]}
@@ -148,7 +157,7 @@ export default function Dashboard() {
                                   <div className="text-xs text-gray-700">
                                     {issue["Summary"]}
                                   </div>
-                                </motion.div>
+                                </MotionDiv>
                               ))}
                             </div>
                           </div>
