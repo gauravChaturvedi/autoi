@@ -1,8 +1,9 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import { Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
+import { Card } from "../components/ui/card";
 
 const STATUS_ORDER = ["Delay", "To Do", "In Progress", "Done"];
 const STATUS_COLOR: Record<string, string> = {
@@ -15,6 +16,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function Dashboard() {
   const [rows, setRows] = useState<any[]>([]);
   const [query, setQuery] = useState("");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const handleCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,7 +29,9 @@ export default function Dashboard() {
   };
 
   const filtered = rows.filter((r) => {
-    const hay = `${r["Issue key"]} ${r["Summary"]} ${r["Custom field (Owner - AUTOI)"] || ""} ${r["Assignee"] || ""}`.toLowerCase();
+    const hay = `${r["Issue key"]} ${r["Summary"]} ${
+      r["Custom field (Owner - AUTOI)"] || ""
+    } ${r["Assignee"] || ""}`.toLowerCase();
     return hay.includes(query.toLowerCase());
   });
 
@@ -44,12 +48,21 @@ export default function Dashboard() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Active Sprint – Owner Swimlanes</h1>
-      <p className="text-gray-600">Grouped by “Custom field (Owner - AUTOI)”, fallback to Assignee.</p>
+      <p className="text-gray-600">
+        Grouped by “Custom field (Owner - AUTOI)”, fallback to Assignee.
+      </p>
 
       <div className="flex gap-4 items-center">
         <label>
-          <span className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer">Upload CSV</span>
-          <input type="file" accept=".csv" className="hidden" onChange={handleCSV} />
+          <span className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer">
+            Upload CSV
+          </span>
+          <input
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleCSV}
+          />
         </label>
 
         <div className="relative">
@@ -65,40 +78,89 @@ export default function Dashboard() {
       </div>
 
       {Object.keys(grouped).length === 0 && (
-        <p className="text-gray-500">No data loaded. Upload a Jira CSV to see swimlanes.</p>
+        <p className="text-gray-500">
+          No data loaded. Upload a Jira CSV to see swimlanes.
+        </p>
       )}
 
       <div className="space-y-8">
-        {Object.entries(grouped).map(([owner, issues]) => (
-          <Card key={owner}>
-            <div className="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
-              <h2 className="font-semibold">{owner}</h2>
-              <span className="text-sm text-gray-500">{issues.length} issues</span>
-            </div>
+        {Object.entries(grouped).map(([owner, issues]) => {
+          const isCollapsed = collapsed[owner];
+          return (
+            <Card key={owner} className="rounded-2xl shadow-md">
+              <div className="px-4 py-3 border-b bg-gray-50 flex justify-between items-center">
+                <h2 className="font-semibold">{owner}</h2>
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm text-gray-500">
+                    {issues.length} issues
+                  </span>
+                  <Button
+                    className="text-xs"
+                    onClick={() =>
+                      setCollapsed((prev) => ({
+                        ...prev,
+                        [owner]: !prev[owner],
+                      }))
+                    }
+                  >
+                    {isCollapsed ? "Expand" : "Collapse"}
+                  </Button>
+                </div>
+              </div>
 
-            <div className="grid md:grid-cols-4 gap-4 p-4">
-              {STATUS_ORDER.map((status) => {
-                const filteredIssues = issues.filter((i) => (i["Status"] || "To Do") === status);
-                return (
-                  <div key={status} className="border rounded bg-gray-50">
-                    <div className="px-2 py-1 text-xs font-semibold border-b bg-gray-100">{status}</div>
-                    <div className="p-2 space-y-2 max-h-72 overflow-auto">
-                      {filteredIssues.length === 0 && (
-                        <div className="text-xs text-gray-400 italic">No items</div>
-                      )}
-                      {filteredIssues.map((issue) => (
-                        <div key={issue["Issue key"]} className={`p-2 rounded border ${STATUS_COLOR[status]}`}>
-                          <div className="font-semibold text-sm">{issue["Issue key"]}</div>
-                          <div className="text-xs text-gray-700">{issue["Summary"]}</div>
-                        </div>
-                      ))}
+              <AnimatePresence initial={false}>
+                {!isCollapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="grid md:grid-cols-4 gap-4 p-4">
+                      {STATUS_ORDER.map((status) => {
+                        const filteredIssues = issues.filter(
+                          (i) => (i["Status"] || "To Do") === status
+                        );
+                        return (
+                          <div
+                            key={status}
+                            className="border rounded bg-gray-50"
+                          >
+                            <div className="px-2 py-1 text-xs font-semibold border-b bg-gray-100">
+                              {status}
+                            </div>
+                            <div className="p-2 space-y-2 max-h-72 overflow-auto">
+                              {filteredIssues.length === 0 && (
+                                <div className="text-xs text-gray-400 italic">
+                                  No items
+                                </div>
+                              )}
+                              {filteredIssues.map((issue) => (
+                                <motion.div
+                                  key={issue["Issue key"]}
+                                  className={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                >
+                                  <div className="font-semibold text-sm">
+                                    {issue["Issue key"]}
+                                  </div>
+                                  <div className="text-xs text-gray-700">
+                                    {issue["Summary"]}
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

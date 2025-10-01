@@ -12,7 +12,7 @@ export function Button({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-medium ${className}`}
+      className={`px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-medium transition ${className}`}
     >
       {children}
     </button>
