@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 import { Search } from "lucide-react";
-import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
 // Strongly typed motion.div wrapper
-const MotionDiv = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
-  (props, ref) => <motion.div ref={ref} {...props} />
-);
+// const MotionDiv = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
+//   (props, ref) => <motion.div ref={ref} {...props} />
+// );
+
+const MotionDiv = motion.div;
 
 const STATUS_ORDER = ["Delay", "To Do", "In Progress", "Done"];
 const STATUS_COLOR: Record<string, string> = {
@@ -150,12 +153,8 @@ export default function Dashboard() {
                                   exit={{ opacity: 0, y: -10 }}
                                   transition={{ duration: 0.2 }}
                                 >
-                                  <div className="font-semibold text-sm">
-                                    {issue["Issue key"]}
-                                  </div>
-                                  <div className="text-xs text-gray-700">
-                                    {issue["Summary"]}
-                                  </div>
+                                  <div className="font-semibold text-sm">{issue["Issue key"]}</div>
+                                  <div className="text-xs text-gray-700">{issue["Summary"]}</div>
                                 </MotionDiv>
                               ))}
                             </div>
