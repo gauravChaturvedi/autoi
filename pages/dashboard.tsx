@@ -34,9 +34,8 @@ export default function Dashboard() {
   };
 
   const filtered = rows.filter((r) => {
-    const hay = `${r["Issue key"]} ${r["Summary"]} ${
-      r["Custom field (Owner - AUTOI)"] || ""
-    } ${r["Assignee"] || ""}`.toLowerCase();
+    const hay = `${r["Issue key"]} ${r["Summary"]} ${r["Custom field (Owner - AUTOI)"] || ""
+      } ${r["Assignee"] || ""}`.toLowerCase();
     return hay.includes(query.toLowerCase());
   });
 
@@ -145,7 +144,7 @@ export default function Dashboard() {
                               {filteredIssues.map((issue) => (
                                 <MotionDiv
                                   key={issue["Issue key"]}
-                                  classes={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
+                                  className={`p-2 rounded border shadow-sm hover:shadow-md transition ${STATUS_COLOR[status]}`}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   exit={{ opacity: 0, y: -10 }}
